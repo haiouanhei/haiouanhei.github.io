@@ -1,0 +1,325 @@
+/* =========================================================
+   生日站 · 许愿区的合成台
+   像素风格的暗色面板，配色沿用网站的紫金主题
+   ========================================================= */
+
+:root {
+  /* 格子尺寸：9 个格子永远正好塞进一行 */
+  --cslot: clamp(24px, calc((100vw - 100px) / 9), 50px);
+  --cgap: 3px;
+}
+
+/* hidden 属性要有最高优先级，否则会被 .cake-wrap{display:flex} 之类的规则顶掉 */
+[hidden] { display: none !important; }
+
+/* ---------- 舞台 ---------- */
+.craft-stage {
+  display: flex;
+  justify-content: center;
+  transition: opacity .45s var(--ease), transform .45s var(--ease);
+}
+
+.craft-stage.is-out {
+  opacity: 0;
+  transform: scale(.94) translateY(12px);
+  pointer-events: none;
+}
+
+/* ---------- 面板 ---------- */
+.craft-panel {
+  width: fit-content;
+  max-width: 100%;
+  padding: 15px 15px 13px;
+  border-radius: 10px;
+  background: linear-gradient(165deg, #3c3453 0%, #2a2239 58%, #221b30 100%);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, .14),
+    inset -2px -2px 0 rgba(0, 0, 0, .55),
+    0 34px 70px -34px rgba(0, 0, 0, .95),
+    0 0 70px -34px rgba(244, 213, 154, .45);
+}
+
+.craft-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.craft-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .65));
+  animation: craftBob 4s ease-in-out infinite;
+}
+
+@keyframes craftBob {
+  50% { transform: translateY(-3px); }
+}
+
+.craft-head-txt b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  color: #f8edd3;
+}
+
+.craft-head-txt span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: rgba(246, 240, 255, .5);
+}
+
+/* ---------- 合成行 ---------- */
+.craft-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(9px, 3vw, 20px);
+  margin: 2px 0 11px;
+}
+
+.craft-grid {
+  display: grid;
+  grid-template-columns: repeat(3, var(--cslot));
+  gap: var(--cgap);
+  padding: 3px;
+  background: rgba(0, 0, 0, .3);
+  border-radius: 4px;
+}
+
+.craft-inv {
+  display: grid;
+  grid-template-columns: repeat(9, var(--cslot));
+  gap: var(--cgap);
+  padding: 3px;
+  background: rgba(0, 0, 0, .3);
+  border-radius: 4px;
+}
+
+.craft-arrow {
+  width: calc(var(--cslot) * .95);
+  display: grid;
+  place-items: center;
+  color: #6a5f85;
+  transition: color .3s, filter .3s;
+}
+
+.craft-arrow svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.craft-arrow.ready {
+  color: var(--gold-2);
+  filter: drop-shadow(0 0 8px rgba(244, 213, 154, .9));
+}
+
+/* ---------- 格子 ---------- */
+.craft-slot {
+  position: relative;
+  width: var(--cslot);
+  height: var(--cslot);
+  padding: 3px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #4b4263, #383050);
+  border: 2px solid;
+  border-color: #191322 #6d6189 #6d6189 #191322;
+  border-radius: 0;
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.craft-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  transition: opacity .1s;
+  pointer-events: none;
+}
+
+.craft-slot:hover::before { opacity: .22; }
+
+.craft-slot:focus-visible {
+  outline: 2px solid var(--gold-2);
+  outline-offset: -1px;
+}
+
+.craft-slot.is-empty { cursor: default; }
+
+.craft-slot.is-empty:hover::before { opacity: 0; }
+
+.craft-slot.is-empty img {
+  opacity: .22;
+  filter: grayscale(.8) brightness(.7);
+}
+
+/* 图解虚影 */
+.craft-slot.ghost img {
+  opacity: .35;
+  filter: none;
+}
+
+.craft-slot img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, .5));
+}
+
+.craft-slot .count {
+  position: absolute;
+  right: 2px;
+  bottom: -1px;
+  z-index: 2;
+  font-family: ui-monospace, "Courier New", monospace;
+  font-size: calc(var(--cslot) * .34);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 2px 2px 0 #1a1526;
+  pointer-events: none;
+}
+
+/* 成品格亮起 */
+.craft-output.ready {
+  animation: craftPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes craftPulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 2px var(--gold-2), 0 0 22px rgba(244, 213, 154, .5);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px #fff3c9, 0 0 36px rgba(244, 213, 154, .9);
+  }
+}
+
+/* ---------- 按钮 / 提示 ---------- */
+.craft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.craft-btn {
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--gold-2);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(244, 213, 154, .3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .25s, border-color .25s, transform .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.craft-btn:hover {
+  background: rgba(244, 213, 154, .14);
+  border-color: rgba(244, 213, 154, .6);
+}
+
+.craft-btn:active { transform: translateY(1px); }
+
+.craft-btn.is-on {
+  background: rgba(244, 213, 154, .22);
+  border-color: rgba(244, 213, 154, .75);
+}
+
+.craft-tip {
+  margin: 9px 0 0;
+  font-size: 11.5px;
+  line-height: 1.8;
+  letter-spacing: .04em;
+  color: rgba(246, 240, 255, .42);
+}
+
+/* ---------- 手上拿着的物品 ---------- */
+.craft-held {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 300;
+  width: var(--cslot);
+  height: var(--cslot);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-999px, -999px, 0) translate(-50%, -50%) scale(1.15);
+  transition: opacity .1s;
+}
+
+.craft-held.on { opacity: 1; }
+
+.craft-held img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .7));
+}
+
+/* ---------- 提示条 ---------- */
+.craft-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  z-index: 320;
+  max-width: 86vw;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: #3a2405;
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-2) 58%, var(--gold-3));
+  border-radius: 999px;
+  box-shadow: 0 18px 44px -16px rgba(244, 213, 154, .75);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 14px);
+  transition: opacity .28s, transform .28s;
+}
+
+.craft-toast.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- 小屏 ---------- */
+@media (max-width: 640px) {
+  .craft-panel { padding: 12px 10px 11px; border-radius: 8px; }
+  .craft-head { margin-bottom: 9px; gap: 8px; }
+  .craft-icon { width: 28px; height: 28px; }
+  .craft-head-txt b { font-size: 13px; letter-spacing: .14em; }
+  .craft-head-txt span { font-size: 10.5px; }
+  .craft-btn { padding: 6px 11px; font-size: 12px; }
+  .craft-tip { font-size: 10.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .craft-icon,
+  .craft-output.ready { animation: none !important; }
+  .craft-stage { transition: none; }
+}
